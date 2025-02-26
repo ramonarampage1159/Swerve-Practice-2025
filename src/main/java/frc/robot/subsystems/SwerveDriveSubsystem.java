@@ -8,8 +8,7 @@ import java.io.File;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import org.ejml.equation.Variable;
-
+import com.revrobotics.spark.SparkFlex;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
@@ -18,49 +17,57 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import swervelib.SwerveDrive;
-import swervelib.SwerveInputStream;
-import swervelib.SwerveModule;
-import swervelib.imu.SwerveIMU;
-import swervelib.math.SwerveMath;
-import swervelib.parser.SwerveParser;
-import swervelib.telemetry.SwerveDriveTelemetry;
-import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-import frc.robot.Constants;
-import frc.robot.Robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import edu.wpi.first.wpilibj.Encoder;
 import static edu.wpi.first.units.Units.Meter;
 
-import com.ctre.phoenix6.StatusSignal;
-//import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
-//import com.ctre.phoenix6.signals.AbsoluteSensorDiscontinuityPoint;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.CANcoderConfigurator;
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+
+
+import swervelib.SwerveDrive;
+import swervelib.SwerveModule;
+import swervelib.parser.SwerveParser;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+
+import frc.robot.Constants;
+import frc.robot.RobotContainer;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathPlannerPath;
+
 
 
 public class SwerveDriveSubsystem extends SubsystemBase {
 
   File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(),"swerve");
   SwerveDrive swerveDrive;
-  //Rotation2d YawPub;
+
+  AHRS m_gyro;
 
 
-  AHRS navx;
-  AHRS m_gyro = new AHRS(NavXComType.kMXP_SPI);
+  /*
+  //TEST FOR SMARTDASHBOARD
+  private DutyCycleEncoder m_absoluteEncoder = new DutyCycleEncoder(0);
+  private Encoder m_relativeEncoder = new Encoder(1, 2);
+   */
 
-  /** Creates a new ExampleSubsystem. */
+
+
   public SwerveDriveSubsystem() {
     
     //change or delete line during competition
     //SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+
     
     try{
       swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(Constants.maximumSpeed,
@@ -73,11 +80,39 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
+    
+    m_gyro = (AHRS)swerveDrive.getGyro().getIMU();
 
+   setupPathPlanner();
 
-    navx = (AHRS)swerveDrive.getGyro().getIMU();
+    //set angle motors to brake mode
+    new Thread(()->{
+      try{
+        Thread.sleep(1000);
+        angleMotorBrake();
+      } catch (Exception e){
+      }
+      }).start();
+      System.out.println("angle motors set brake mode");
+   
   }
- //test
+
+
+  public void zeroGyro(){
+    swerveDrive.zeroGyro();
+  }
+
+
+  public void angleMotorBrake(){
+
+    for(SwerveModule module : swerveDrive.getModules()){
+      module.getAngleMotor().setMotorBrake(true);
+      module.getAngleMotor().burnFlash();    
+    }
+
+  }
+  
+ 
 
   /**
    * Example command factory method.
@@ -93,39 +128,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         });
   }
 
-  /*public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX)
-  {
-    return run(() -> {
-      // Make the robot move
-      swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-                            translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
-                            translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()), 0.8),
-             Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
-                        true,
-                        false);
-    });
-  }*/
-
-
-
-  //new 02/12
-  /*public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier headingX, DoubleSupplier headingY)
-  {
-    // swerveDrive.setHeadingCorrection(true); // Normally you would want heading correction for this kind of control.
-    return run(() -> {
-      double xInput = Math.pow(translationX.getAsDouble(), 3); // Smooth controll out
-      double yInput = Math.pow(translationY.getAsDouble(), 3); // Smooth controll out
-      // Make the robot move
-      driveFieldOriented(swerveDrive.swerveController.getTargetSpeeds(xInput, yInput,
-                                                                      headingX.getAsDouble(),
-                                                                      headingY.getAsDouble(),
-                                                                      swerveDrive.getOdometryHeading().getRadians(),
-                                                                      //swerveDrive.getMaximumVelocity(),
-                                                                      swerveDrive.getMaximumChassisVelocity()
-                                                                      ));
-    });
-  }*/
-
+  
   public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX)
   {
     return run(() -> {
@@ -135,119 +138,73 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                         Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
                         true,
                         false);
+
+    });
+  }
+
+
+  public Command driveRobotCentricCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX)
+  {
+    return run(() -> {
+      // Make the robot move
+      swerveDrive.drive(new Translation2d(Math.pow(translationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisVelocity(),
+                                          Math.pow(translationY.getAsDouble(), 3) * swerveDrive.getMaximumChassisVelocity()),
+                        Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
+                        false,
+                        false);
+
     });
   }
   
 
-
-
-
-  
-
-  /*
-   * public class Robot extends TimedRobot
-{
-
-  private static Robot   instance;
-  private CANcoder    absoluteEncoder;
-
-  public Robot()
-  {
-    instance = this;
-  }
-
-  public static Robot getInstance()
-  {
-    return instance;
-  }
-   */
-
-  
-
-  /**
-   * This function is run when the robot is first started up and should be used for any initialization code.
-   */
-  
-  /**
-  
-   *    @Override
-    public void robotInit()
-  {
-    absoluteEncoder = new CANcoder(Change this to the CAN ID of the CANcoder 0);
-   CANcoderConfigurator cfg = encoder.getConfigurator();
-   cfg.apply(new CANcoderConfiguration());
-   MagnetSensorConfigs  magnetSensorConfiguration = new MagnetSensorConfigs();
-   cfg.refresh(magnetSensorConfiguration);
-   cfg.apply(magnetSensorConfiguration
-                  .withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
-                  .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive));
-                  
-  }
-  */
-
-
-  
-  /**
-   * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics that you want ran
-   * during disabled, autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before LiveWindow and
-   * SmartDashboard integrated updating.
-   */
-
-   /*
-    * @Override
-  public void robotPeriodic()
-  {
-   StatusSignal<Double> angle = encoder.getAbsolutePosition().waitForUpdate(0.1);
-
-   System.out.println("Absolute Encoder Angle (degrees): " + Units.rotationsToDegrees(angle.getValue()));
-  }
-}
-  
-    */
-  
   private void updateSmartDashboard() {
 
     //SmartDashboard.putNumber("Yaw Pub", swerveDrive.getYaw().getDegrees());
 
-    double angle = m_gyro.getAngle();
-    double angle2 = navx.getAngle();
+    double angle = m_gyro.getYaw();
     SmartDashboard.putNumber("Yaw Pub", angle);
-    SmartDashboard.putNumber("Yaw Pub 2", angle2);
-
-
-
-    
-
-    // Rotation2d.fromRadians(imuReadingCache.getValue().getZ());
-
-
-    //Rotation2d.fromRadians()
-   // return Rotation2d.fromRadians(imuReadingCache.getValue().getZ());
-
 
 
     for(SwerveModule m : swerveDrive.getModules())
     {
-      //System.out.println("Module Name: "+m.configuration.name);
       CANcoder absoluteEncoder = (CANcoder)m.configuration.absoluteEncoder.getAbsoluteEncoder();
 
       String AbsEncoderID = Integer.toString(absoluteEncoder.getDeviceID());
     
-      //output here
-
       double AbsoluteEncoderDeg = absoluteEncoder.getAbsolutePosition().getValueAsDouble();
       AbsoluteEncoderDeg *= 360.0;
 
+      double InternalAngle = AbsoluteEncoderDeg - m.configuration.angleOffset;
+
+      double ModuleSpeed = absoluteEncoder.getVelocity().getValueAsDouble();
+
       SmartDashboard.putNumber("Raw Abs Encoder #" + AbsEncoderID, AbsoluteEncoderDeg);   
+      SmartDashboard.putNumber("Internal Angle Encoder #" + AbsEncoderID, InternalAngle);
+      SmartDashboard.putNumber("Module " + AbsEncoderID + " Speed", ModuleSpeed);
+
     }
+
+
+    for(SwerveModule module : swerveDrive.getModules())
+    {
+        SparkFlex driveMotor = (SparkFlex)module.configuration.driveMotor.getMotor();
+
+        String driveMotorID = Integer.toString(driveMotor.getDeviceId());
+
+        double driveMotorVelocity = driveMotor.getEncoder().getVelocity();
+          
+      SmartDashboard.putNumber("Drive Motor # " + driveMotorID, driveMotorVelocity);   
+
+    }
+
+    /*
+    //TEST for SmartDashboard
+    int count = m_relativeEncoder.get()/2048;
+    double RelativeDistance = m_relativeEncoder.get()/2048.000*5.00000000*Math.PI;
     
-
-
-
-
-
+    SmartDashboard.putNumber("RelativeDistance", RelativeDistance);   
+    SmartDashboard.putNumber("Count", count);  
+     */
 
     
   }
@@ -266,6 +223,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     updateSmartDashboard();
+
+    //not working 02/23
+    //swerveDrive.setMotorIdleMode(true);
+
     // This method will be called once per scheduler run
   }
 
@@ -292,6 +253,92 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   }
 
 
+   /**
+   * Setup AutoBuilder for PathPlanner.
+   */
+  
+  public void setupPathPlanner()
+  {
+    // Load the RobotConfig from the GUI settings. You should probably
+    // store this in your Constants file
+    RobotConfig config;
+    try
+    {
+      config = RobotConfig.fromGUISettings();
 
+      final boolean enableFeedforward = true;
+      // Configure AutoBuilder last
+      AutoBuilder.configure(
+          swerveDrive::getPose,
+          // Robot pose supplier
+          swerveDrive::resetOdometry,
+          // Method to reset odometry (will be called if your auto has a starting pose)
+          swerveDrive::getRobotVelocity,
+          // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+          (speedsRobotRelative, moduleFeedForwards) -> {
+            if (enableFeedforward)
+            {
+              swerveDrive.drive(
+                  speedsRobotRelative,
+                  swerveDrive.kinematics.toSwerveModuleStates(speedsRobotRelative),
+                  moduleFeedForwards.linearForces()
+                               );
+            } else
+            {
+              swerveDrive.setChassisSpeeds(speedsRobotRelative);
+            }
+          },
+          // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+          new PPHolonomicDriveController(
+              // PPHolonomicController is the built in path following controller for holonomic drive trains
+              /* 02/17 part of original working (kind of) code
+              new PIDConstants(5.0, 0.0, 0.0), */
+              new PIDConstants(0.002075, 0.0, 0.05),
+              // Translation PID constants
+              /* 02/17 part of original working (kind of) code
+              new PIDConstants(5.0, 0.0, 0.0) */
+              new PIDConstants(0.01, 0.0, 0.0)
+              // Rotation PID constants
+          ),
+          config,
+          // The robot configuration
+          () -> {
+            // Boolean supplier that controls when the path will be mirrored for the red alliance
+            // This will flip the path being followed to the red side of the field.
+            // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+            var alliance = DriverStation.getAlliance();
+            if (alliance.isPresent())
+            {
+              return alliance.get() == DriverStation.Alliance.Red;
+            }
+            return false;
+          },
+          this
+          // Reference to this subsystem to set requirements
+                           );
+
+    } catch (Exception e)
+    {
+      // Handle exception as needed
+      e.printStackTrace();
+    }
+
+    //Preload PathPlanner Path finding
+    // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
+    PathfindingCommand.warmupCommand().schedule();
+  }
+
+   /**
+   * Get the path follower with events.
+   *
+   * @param pathName PathPlanner path name.
+   * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
+   */
+  public Command getAutonomousCommand(String pathName)
+  {
+    // Create a path following command using AutoBuilder. This will also trigger event markers.
+    return new PathPlannerAuto(pathName);
+  }
 
 }
