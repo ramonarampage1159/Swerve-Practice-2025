@@ -10,7 +10,7 @@ public class ManualElevatorCommand extends Command {
 
   public ManualElevatorCommand() {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(RobotContainer.m_manualElevatorSubsystem);
+  //addRequirements(RobotContainer.m_manualElevatorSubsystem); 
   }
 
   // Called when the command is initially scheduled.
@@ -20,8 +20,8 @@ public class ManualElevatorCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-    SmartDashboard.putNumber("Elevator Motor Current", RobotContainer.m_manualElevatorSubsystem.getCurrentValue());
+/*
+     SmartDashboard.putNumber("Elevator Motor Current", RobotContainer.m_manualElevatorSubsystem.getCurrentValue());
 
     if(RobotContainer.m_operatorController.getRawButtonPressed(Constants.OperatorConstants.JoystickButtons.m_xButton)){
 
@@ -42,8 +42,10 @@ public class ManualElevatorCommand extends Command {
       RobotContainer.m_manualElevatorSubsystem.stopMotors();
     }   
    
-  }
 
+
+  */
+  }
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {}

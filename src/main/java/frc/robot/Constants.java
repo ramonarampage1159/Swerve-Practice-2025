@@ -61,8 +61,8 @@ public final class Constants {
 
   public static final class ElevatorConstants{
 
-    public static final int m_leftMotor = 15;
-    public static final int m_rightMotor = 16;
+    public static final int m_leftMotor = 16;
+    public static final int m_rightMotor = 15;
 
     public static final int MAX_CURRENT = 40;
 
@@ -76,9 +76,6 @@ public final class Constants {
       public static final double m_ZerokMaxOutput = 0; 
       public static final double m_ZerokMinOutput = -0;
 
-      public static final double m_ZeroP = 0.05;
-      public static final double m_ZeroMaxOutput = 0.5; 
-      public static final double m_ZeroMinOutput = -0.5;
       public static final double m_ZerokRotations = 0;
     }
   
@@ -109,7 +106,28 @@ public final class Constants {
       public static final double m_L3MinOutput = -0.5;
     }
 
+    public static class Processor_PIDS{
+      public static final double m_processorP = 0.05; 
+      public static final double m_processorI = 0.00;
+      public static final double m_processorD = 0.00; 
+      public static final double m_processorRotations = 0; 
+      public static final double m_processorMaxOutput = 0.5; 
+      public static final double m_processorMinOutput = -0.5;
+    }
+
   }
+
+  public static final class CoralConstants{
+    public static final int m_motorCoralRight = 17;
+    public static final int m_motorCoralLeft = 18;
+  }
+
+  public static class AutoConstants {
+      public static final double CoralShootTimeLimitSeconds = 2;
+    
+
+  }
+  
 
 }
 

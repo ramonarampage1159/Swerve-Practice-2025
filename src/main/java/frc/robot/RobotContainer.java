@@ -5,8 +5,11 @@
 package frc.robot;
 
 import frc.robot.Constants.DriverConstants;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.*;
 import frc.robot.commands.*;
+import frc.robot.commands.AutoCommands.CoralShootAuto;
+import frc.robot.commands.AutoCommands.L1CoralAuto;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -36,25 +39,32 @@ public class RobotContainer {
 
   public static ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   public static SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem();
-  public static ManualElevatorSubsystem m_manualElevatorSubsystem = new ManualElevatorSubsystem();
+  //public static ManualElevatorSubsystem m_manualElevatorSubsystem = new ManualElevatorSubsystem();
   public static ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
+  public static CoralSubsystem m_coralSubsystem = new CoralSubsystem();
 
+  public static L1CoralAuto m_L1CoralAuto = new L1CoralAuto();
+  public static CoralShootAuto m_CoralShootAuto = new CoralShootAuto(Constants.AutoConstants.CoralShootTimeLimitSeconds);
+  
   public static Joystick m_driverController = new Joystick (Constants.DriverConstants.m_driverController);
   public static Joystick m_operatorController = new Joystick(Constants.OperatorConstants.m_operatorController);
 
   private final SendableChooser<Command> autoChooser;
 
 
-  public RobotContainer() {
+  public RobotContainer() { 
 
-    configureBindings();
+    NamedCommands.registerCommand("L1 Coral Auto", m_L1CoralAuto);
+    NamedCommands.registerCommand("Coral Shoot Auto", m_CoralShootAuto);
+
+    NamedCommands.registerCommand("test", Commands.print("Hello World"));
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
-    DriverStation.silenceJoystickConnectionWarning(true);
-    NamedCommands.registerCommand("test", Commands.print("Hello World"));
+    configureBindings();
 
+    //DriverStation.silenceJoystickConnectionWarning(true);
   }
 
 
@@ -88,8 +98,10 @@ public class RobotContainer {
   private void configureBindings() {
 
     m_swerveDriveSubsystem.setDefaultCommand(driveDirectAngle);
-    m_manualElevatorSubsystem.setDefaultCommand(new ManualElevatorCommand());
+    
+    //m_manualElevatorSubsystem.setDefaultCommand(new ManualElevatorCommand());
     m_elevatorSubsystem.setDefaultCommand(new ElevatorCommand());
+    m_coralSubsystem.setDefaultCommand(new CoralCommand());
 
     new JoystickButton(m_driverController, Constants.DriverConstants.JoystickButtons.m_xButton).onTrue(driveDirectAngle); 
     new JoystickButton(m_driverController, Constants.DriverConstants.JoystickButtons.m_aButton).onTrue(driveRobotOrientedDirectAngle);

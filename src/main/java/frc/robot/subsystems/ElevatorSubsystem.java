@@ -8,10 +8,12 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
 public class ElevatorSubsystem extends SubsystemBase{
     /** Creates a new ArmSubsystem. */
@@ -25,6 +27,9 @@ public class ElevatorSubsystem extends SubsystemBase{
     
     public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput;
     public double rotations;
+
+    public double current = m_leftElevatorMotor.getOutputCurrent();
+
 
   public ElevatorSubsystem() {
 
@@ -82,6 +87,34 @@ public class ElevatorSubsystem extends SubsystemBase{
     m_leftElevatorMotor.configure(m_motorLeftConfig,null,null);
   }
 
+  //THIS OR TAHT
+  public double getCurrentValue(){
+    return current;
+  }
+
+  /*
+  //THIS OR THAT
+  public void CurrentSensing(){
+    double current = m_leftElevatorMotor.getOutputCurrent();
+    boolean stopMotors = false;
+
+    if(current >= Constants.ElevatorConstants.MAX_CURRENT){
+      stopMotors = true;
+      SmartDashboard.putBoolean("Current Sensing Elevator Stop", stopMotors);
+    }
+  }
+  */
+  public boolean CurrentSensingStop(){
+    boolean stopMotors = false;
+
+    if(current >= Constants.ElevatorConstants.MAX_CURRENT){
+      stopMotors = true;
+      SmartDashboard.putBoolean("Current Sensing Elevator Stop", stopMotors);
+    }
+    return stopMotors;
+  }
+
+
  @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -92,5 +125,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     SmartDashboard.putBoolean("arm at setpoint", isAtSetpoint());
     */
     SmartDashboard.putNumber("Elevator Position", m_leftElevatorMotor.getEncoder().getPosition());
+    SmartDashboard.putNumber("Elevator Current TEST", getCurrentValue());
+
   }
 }
