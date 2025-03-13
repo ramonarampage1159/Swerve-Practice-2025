@@ -127,5 +127,7 @@ public class ElevatorSubsystem extends SubsystemBase{
     SmartDashboard.putNumber("Elevator Position", m_leftElevatorMotor.getEncoder().getPosition());
     SmartDashboard.putNumber("Elevator Current TEST", getCurrentValue());
 
+    //CurrentSensingStop();
+
   }
 }

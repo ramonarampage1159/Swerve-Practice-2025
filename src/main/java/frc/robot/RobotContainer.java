@@ -9,7 +9,8 @@ import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.*;
 import frc.robot.commands.*;
 import frc.robot.commands.AutoCommands.CoralShootAuto;
-import frc.robot.commands.AutoCommands.L1CoralAuto;
+import frc.robot.commands.AutoCommands.L2CoralAuto;
+import frc.robot.commands.AutoCommands.L3CoralAuto;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -43,7 +44,8 @@ public class RobotContainer {
   public static ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
   public static CoralSubsystem m_coralSubsystem = new CoralSubsystem();
 
-  public static L1CoralAuto m_L1CoralAuto = new L1CoralAuto();
+  public static L2CoralAuto m_L2CoralAuto = new L2CoralAuto();
+  public static L3CoralAuto m_L3CoralAuto = new L3CoralAuto();
   public static CoralShootAuto m_CoralShootAuto = new CoralShootAuto(Constants.AutoConstants.CoralShootTimeLimitSeconds);
   
   public static Joystick m_driverController = new Joystick (Constants.DriverConstants.m_driverController);
@@ -54,11 +56,10 @@ public class RobotContainer {
 
   public RobotContainer() { 
 
-    NamedCommands.registerCommand("L1 Coral Auto", m_L1CoralAuto);
+    NamedCommands.registerCommand("L2 Coral Auto", m_L2CoralAuto);
     NamedCommands.registerCommand("Coral Shoot Auto", m_CoralShootAuto);
-
-    NamedCommands.registerCommand("test", Commands.print("Hello World"));
-
+    NamedCommands.registerCommand("L3 Coral Auto", m_L3CoralAuto);
+    
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
@@ -75,7 +76,7 @@ public class RobotContainer {
 
       
   public Command driveRobotOrientedDirectAngle = m_swerveDriveSubsystem.driveRobotCentricCommand(
-     () -> MathUtil.applyDeadband(m_driverController.getRawAxis(1) , DriverConstants.translationDEADBAND),
+     () -> MathUtil.applyDeadband(m_driverController.getRawAxis(1), DriverConstants.translationDEADBAND),
      () -> MathUtil.applyDeadband(m_driverController.getRawAxis(0), DriverConstants.translationDEADBAND),
      () -> MathUtil.applyDeadband(m_driverController.getRawAxis(2), DriverConstants.rotationDEADBAND));
 
@@ -83,7 +84,6 @@ public class RobotContainer {
   public boolean getRawButtonPressed(int button){
       return m_operatorController.getRawButton(button);
   }
-    
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the

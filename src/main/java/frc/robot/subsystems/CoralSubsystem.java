@@ -44,7 +44,7 @@ public class CoralSubsystem extends SubsystemBase {
         });
   }
   public void IntakeCoral() {
-    m_motorCoralLeft.set(0.2);
+    m_motorCoralLeft.set(.8);
   }
 
 
@@ -54,7 +54,7 @@ public class CoralSubsystem extends SubsystemBase {
 
 
   public void shootCoral(){
-    m_motorCoralLeft.set(-0.2);
+    m_motorCoralLeft.set(-1.);
   }
 
 

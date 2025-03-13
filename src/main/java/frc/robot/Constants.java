@@ -53,7 +53,7 @@ public final class Constants {
       public static final int m_backButton = 9;
       public static final int m_startButton = 10;
       public static final int m_leftStickButton = 11;
-      public static final int m_rightStickButton = 12;
+      public static final int m_rightStickButton = 12; 
 
     }
 
@@ -66,7 +66,11 @@ public final class Constants {
 
     public static final int MAX_CURRENT = 40;
 
+    public static final double m_elevatorP = 0.1;
+    public static final double m_elevatorI = 0.00;
+    public static final double m_elevatorD = 0.00; 
 
+    
     public final class ZeroPIDS{
       public static final double m_ZerokP = 0; 
       public static final double m_ZerokI = 0.000;
@@ -76,44 +80,49 @@ public final class Constants {
       public static final double m_ZerokMaxOutput = 0; 
       public static final double m_ZerokMinOutput = -0;
 
-      public static final double m_ZerokRotations = 0;
+      public static final double m_zeroRotations = 0;
+      public static final double m_zeroMaxOutput = 0.5;
+      public static final double m_zeroMinOutput = -0.5;
     }
   
     public static class L1_PIDS{
-      public static final double m_L1P = 0.05; 
-      public static final double m_L1I = 0.00;
-      public static final double m_L1D = 0.00; 
-      public static final double m_L1Rotations = 27; 
+      public static final double m_L1Rotations = 18.5; //30 for L1      8.5 for intake 
       public static final double m_L1MaxOutput = 0.5; 
       public static final double m_L1MinOutput = -0.5;
     }
 
     public static class L2_PIDS{
-      public static final double m_L2P = 0.05; 
-      public static final double m_L2I = 0.00;
-      public static final double m_L2D = 0.00; 
-      public static final double m_L2Rotations = 54; 
+      public static final double m_L2Rotations = 46; 
       public static final double m_L2MaxOutput = 0.5; 
       public static final double m_L2MinOutput = -0.5;
     }
 
     public static class L3_PIDS{
-      public static final double m_L3P = 0.05; 
-      public static final double m_L3I = 0.00;
-      public static final double m_L3D = 0.00; 
-      public static final double m_L3Rotations = 81; 
+      public static final double m_L3Rotations = 66.5; 
       public static final double m_L3MaxOutput = 0.5; 
       public static final double m_L3MinOutput = -0.5;
     }
 
     public static class Processor_PIDS{
-      public static final double m_processorP = 0.05; 
-      public static final double m_processorI = 0.00;
-      public static final double m_processorD = 0.00; 
       public static final double m_processorRotations = 0; 
       public static final double m_processorMaxOutput = 0.5; 
       public static final double m_processorMinOutput = -0.5;
     }
+
+    public static class Station_PIDS{
+      public static final double m_stationRotations = 8.5; 
+      public static final double m_stationMaxOutput = 0.5; 
+      public static final double m_stationMinOutput = -0.5;
+    }    
+
+    //algae position definition by mr ferguson 2025.03.08
+    public static class A1_PIDS{
+      public static final double m_A1Rotations = 25.; 
+      public static final double m_A1MaxOutput = 0.25; 
+      public static final double m_A1MinOutput = -0.25;
+    }
+    //min & max output lowered for testing purposes
+    //end testing by mr ferguson
 
   }
 
@@ -124,8 +133,6 @@ public final class Constants {
 
   public static class AutoConstants {
       public static final double CoralShootTimeLimitSeconds = 2;
-    
-
   }
   
 

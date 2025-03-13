@@ -6,10 +6,10 @@ import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
 
-public class L1CoralAuto extends Command{
+public class L2CoralAuto extends Command{
     
-   /** Creates a new L1CoralAuto. */
-   public L1CoralAuto() {
+   /** Creates a new L2CoralAuto. */
+   public L2CoralAuto() {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(RobotContainer.m_elevatorSubsystem);
   }
@@ -21,13 +21,13 @@ public class L1CoralAuto extends Command{
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-      double L1PValue = Constants.ElevatorConstants.L1_PIDS.m_L1P;
-      double L1IValue = Constants.ElevatorConstants.L1_PIDS.m_L1I;
-      double L1DValue = Constants.ElevatorConstants.L1_PIDS.m_L1D;
-      RobotContainer.m_elevatorSubsystem.setPIDValues(L1PValue, L1IValue, L1DValue, 
-      Constants.ElevatorConstants.L1_PIDS.m_L1MinOutput, Constants.ElevatorConstants.L1_PIDS.m_L1MaxOutput);
-      double L1Rotations = Constants.ElevatorConstants.L1_PIDS.m_L1Rotations;
-      RobotContainer.m_elevatorSubsystem.setArmReference(L1Rotations, SparkBase.ControlType.kPosition);
+    double L2PValue = Constants.ElevatorConstants.m_elevatorP;
+      double L2IValue = Constants.ElevatorConstants.m_elevatorI;
+      double L2DValue = Constants.ElevatorConstants.m_elevatorD;
+      RobotContainer.m_elevatorSubsystem.setPIDValues(L2PValue, L2IValue, L2DValue, 
+      Constants.ElevatorConstants.L2_PIDS.m_L2MinOutput, Constants.ElevatorConstants.L2_PIDS.m_L2MaxOutput);
+      double L2Rotations = Constants.ElevatorConstants.L2_PIDS.m_L2Rotations;
+      RobotContainer.m_elevatorSubsystem.setArmReference(L2Rotations, SparkBase.ControlType.kPosition);
   }
 
   // Called once the command ends or is interrupted.

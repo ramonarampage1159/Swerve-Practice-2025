@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "L2 Coral Middle Path"
+            "pathName": "L3 Coral Left Path"
           }
         },
         {
@@ -25,7 +25,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.0
+            "waitTime": 0.0
           }
         },
         {

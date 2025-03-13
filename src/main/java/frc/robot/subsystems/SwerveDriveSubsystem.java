@@ -4,39 +4,13 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Meter;
+
 import java.io.File;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import com.revrobotics.spark.SparkFlex;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.studica.frc.AHRS;
-import com.studica.frc.AHRS.NavXComType;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.motorcontrol.MotorController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.Encoder;
-import static edu.wpi.first.units.Units.Meter;
-
-
-
-import swervelib.SwerveDrive;
-import swervelib.SwerveModule;
-import swervelib.parser.SwerveParser;
-import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-
-import frc.robot.Constants;
-import frc.robot.RobotContainer;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -44,6 +18,22 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.revrobotics.spark.SparkFlex;
+import com.studica.frc.AHRS;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import swervelib.SwerveDrive;
+import swervelib.SwerveModule;
+import swervelib.parser.SwerveParser;
 
 
 
@@ -53,7 +43,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   SwerveDrive swerveDrive;
 
   AHRS m_gyro;
-
 
   /*
   //TEST FOR SMARTDASHBOARD
@@ -89,7 +78,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     new Thread(()->{
       try{
         Thread.sleep(1000);
-        angleMotorBrake();
+        //angleMotorBrake();
       } catch (Exception e){
       }
       }).start();
@@ -128,8 +117,32 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         });
   }
 
-  
+
   public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX)
+  {
+    return run(() -> {
+      // Make the robot move
+      if (DriverStation.getAlliance().isPresent() && (DriverStation.getAlliance().get()) == DriverStation.Alliance.Red)
+      {
+        swerveDrive.drive(new Translation2d(Math.pow(translationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisVelocity(),
+                                          Math.pow(translationY.getAsDouble(), 3) * swerveDrive.getMaximumChassisVelocity()),
+                        Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
+                        true,
+                        false);
+      }else
+      {
+        swerveDrive.drive(new Translation2d(Math.pow(translationX.getAsDouble() *-1, 3) * swerveDrive.getMaximumChassisVelocity(),
+                                          Math.pow(translationY.getAsDouble() *-1, 3) * swerveDrive.getMaximumChassisVelocity()),
+                        Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumChassisAngularVelocity(),
+                        true,
+                        false);
+      }
+    });
+  }
+
+
+ /* 
+ public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX)
   {
     return run(() -> {
       // Make the robot move
@@ -141,7 +154,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     });
   }
-
+*/
 
   public Command driveRobotCentricCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX)
   {
@@ -155,7 +168,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     });
   }
-  
 
   private void updateSmartDashboard() {
 
@@ -223,10 +235,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     updateSmartDashboard();
-
-    //not working 02/23
-    //swerveDrive.setMotorIdleMode(true);
-
     // This method will be called once per scheduler run
   }
 
@@ -252,11 +260,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     });
   }
 
+  public void setMotorSpeed(double xAxis, double yAxis, double  zAxis) {
+    
+  }
+
 
    /**
    * Setup AutoBuilder for PathPlanner.
    */
-  
+
   public void setupPathPlanner()
   {
     // Load the RobotConfig from the GUI settings. You should probably
@@ -293,11 +305,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
               // PPHolonomicController is the built in path following controller for holonomic drive trains
               /* 02/17 part of original working (kind of) code
               new PIDConstants(5.0, 0.0, 0.0), */
-              new PIDConstants(0.002075, 0.0, 0.05),
+              new PIDConstants(0.02, 0.0, 0.0),
               // Translation PID constants
               /* 02/17 part of original working (kind of) code
               new PIDConstants(5.0, 0.0, 0.0) */
-              new PIDConstants(0.01, 0.0, 0.0)
+              new PIDConstants(0.05, 0.0, 0.0)
               // Rotation PID constants
           ),
           config,

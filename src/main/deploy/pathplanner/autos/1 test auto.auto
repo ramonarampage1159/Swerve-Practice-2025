@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "L1 Coral Left Path"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "L1 Coral"
+            "pathName": "1 test path"
           }
         }
       ]
