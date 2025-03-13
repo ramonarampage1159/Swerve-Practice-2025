@@ -43,6 +43,8 @@ public class RobotContainer {
   //public static ManualElevatorSubsystem m_manualElevatorSubsystem = new ManualElevatorSubsystem();
   public static ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
   public static CoralSubsystem m_coralSubsystem = new CoralSubsystem();
+  public static AlgaeSubsystem m_AlgaeSubsystem = new AlgaeSubsystem();
+
 
   public static L2CoralAuto m_L2CoralAuto = new L2CoralAuto();
   public static L3CoralAuto m_L3CoralAuto = new L3CoralAuto();
@@ -102,6 +104,7 @@ public class RobotContainer {
     //m_manualElevatorSubsystem.setDefaultCommand(new ManualElevatorCommand());
     m_elevatorSubsystem.setDefaultCommand(new ElevatorCommand());
     m_coralSubsystem.setDefaultCommand(new CoralCommand());
+    m_AlgaeSubsystem.setDefaultCommand(new AlgaeCommand());
 
     new JoystickButton(m_driverController, Constants.DriverConstants.JoystickButtons.m_xButton).onTrue(driveDirectAngle); 
     new JoystickButton(m_driverController, Constants.DriverConstants.JoystickButtons.m_aButton).onTrue(driveRobotOrientedDirectAngle);
